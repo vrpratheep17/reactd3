@@ -1,0 +1,36 @@
+.link {
+  stroke: #4b5563;
+  stroke-width: 1.2px;
+  opacity: 0.6;
+}
+
+.node-circle {
+  fill: #111827;
+  stroke: #38bdf8;
+  stroke-width: 1.5px;
+}
+
+.node-person {
+  fill: #0f172a;
+  stroke: #22c55e;
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 4px #22c55e);
+}
+
+.node-category {
+  stroke: #38bdf8;
+}
+
+.node-team {
+  stroke: #a855f7;
+}
+
+.node-item {
+  stroke: #6b7280;
+}
+
+.node-label {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px;
+  fill: #e5e7eb;
+}
