@@ -1,6 +1,6 @@
 function Sidebar({ form, setForm, onSubmit, toggles, setToggles, hasItems }) {
   return (
-    <aside className="basis-1/3 max-w-[33%] border-r border-gray-200 dark:border-neutral-800 p-6 space-y-6">
+    <aside className="basis-1/3 max-w-[33%] h-full shrink-0 overflow-auto border-r border-gray-200 dark:border-neutral-800 p-6 space-y-6">
       <div>
         <h2 className="text-lg font-semibold mb-4">Lookup Person</h2>
         <form

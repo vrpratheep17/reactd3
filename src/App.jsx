@@ -12,8 +12,9 @@ function App() {
   const [nodes, setNodes] = useState([]); // for Canvas
   const [edges, setEdges] = useState([]);
   const rightRef = useRef(null);
-  const [canvasWidth, setCanvasWidth] = useState(720);
-  const [canvasHeight, setCanvasHeight] = useState(400);
+  const canvasContainerRef = useRef(null);
+  const [canvasWidth, setCanvasWidth] = useState(1020);
+  const [canvasHeight, setCanvasHeight] = useState(800);
 
   const handleSubmit = async () => {
     const id = form.personId.trim();
@@ -85,21 +86,28 @@ function App() {
     };
   }, [toggles, person, canvasWidth, canvasHeight]);
 
-  // Measure right pane to make canvas full height and responsive width
+  // Measure the right pane for exact sizing (full width/height)
   useEffect(() => {
+    const el = rightRef.current;
+    if (!el) return;
     const measure = () => {
-      if (!rightRef.current) return;
-      const rect = rightRef.current.getBoundingClientRect();
-      setCanvasWidth(Math.max(320, Math.floor(rect.width)));
-      setCanvasHeight(Math.max(300, Math.floor(window.innerHeight - rect.top - 24))); // 24px bottom padding
+      setCanvasWidth(Math.floor(el.clientWidth));
+      setCanvasHeight(Math.floor(el.clientHeight));
     };
-    measure();
+    // Defer initial measure to ensure layout is settled
+    const raf = requestAnimationFrame(measure);
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-gray-50 text-gray-900 dark:bg-neutral-900 dark:text-neutral-100">
+    <div className="fixed inset-0 h-dvh flex overflow-hidden bg-gray-50 text-gray-900 dark:bg-neutral-900 dark:text-neutral-100">
       <Sidebar
         form={form}
         setForm={setForm}
@@ -108,14 +116,16 @@ function App() {
         setToggles={setToggles}
         hasItems={!!person}
       />
-      <section ref={rightRef} className="flex-1 p-6">
-        <Canvas
-          width={canvasWidth}
-          height={canvasHeight}
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={setNodes}
-        />
+      <section ref={rightRef} className="flex-1 min-h-0 min-w-0 h-dvh p-0 overflow-hidden">
+        <div ref={canvasContainerRef} className="relative w-full h-full">
+          <Canvas
+            width={canvasWidth}
+            height={canvasHeight}
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={setNodes}
+          />
+        </div>
       </section>
     </div>
   );

@@ -3,7 +3,13 @@ import * as d3 from "d3";
 
 // nodes: [{ id, type: 'circle'|'square'|'triangle', x, y, size, label }]
 // edges: [{ source: id, target: id }]
-function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChange }) {
+function Canvas({
+  width = 700,
+  height = 200,
+  nodes = [],
+  edges = [],
+  onNodesChange,
+}) {
   const canvasRef = useRef(null);
   const simRef = useRef(null);
   const nodesRef = useRef([]);
@@ -43,7 +49,10 @@ function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChan
     // Build links referencing node objects
     const idMap = new Map(simNodes.map((n) => [n.id, n]));
     linksRef.current = edges
-      .map((e) => ({ source: idMap.get(e.source), target: idMap.get(e.target) }))
+      .map((e) => ({
+        source: idMap.get(e.source),
+        target: idMap.get(e.target),
+      }))
       .filter((l) => l.source && l.target);
 
     // Init or update simulation
@@ -55,11 +64,16 @@ function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChan
           d3
             .forceLink(linksRef.current)
             .id((d) => d.id)
-            .distance((l) => ((l.source.size ?? 28) + (l.target.size ?? 28)) * 0.9)
+            .distance(
+              (l) => ((l.source.size ?? 28) + (l.target.size ?? 28)) * 0.9
+            )
             .strength(0.12)
         )
         .force("charge", d3.forceManyBody().strength(-200))
-        .force("collide", d3.forceCollide().radius((d) => (d.size ?? 28) * 0.6 + 8))
+        .force(
+          "collide",
+          d3.forceCollide().radius((d) => (d.size ?? 28) * 0.6 + 8)
+        )
         .force("center", d3.forceCenter(width / 2, height / 2))
         .alpha(0.8)
         .alphaDecay(0.05)
@@ -89,7 +103,8 @@ function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChan
 
       // title
       ctx.fillStyle = "#0f172a";
-      ctx.font = "600 16px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
+      ctx.font =
+        "600 16px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
       ctx.textAlign = "left";
       ctx.fillText("Canvas Nodes", 12, 24);
 
@@ -106,7 +121,12 @@ function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChan
       // nodes
       nodesRef.current.forEach((n) => {
         const size = n.size ?? 28;
-        const color = n.type === "circle" ? "#2563eb" : n.type === "square" ? "#10b981" : "#f59e0b";
+        const color =
+          n.type === "circle"
+            ? "#2563eb"
+            : n.type === "square"
+            ? "#10b981"
+            : "#f59e0b";
         ctx.save();
         ctx.fillStyle = color;
         ctx.strokeStyle = "#0f172a22";
@@ -133,7 +153,8 @@ function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChan
         }
         if (n.label) {
           ctx.fillStyle = "#334155";
-          ctx.font = "12px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
+          ctx.font =
+            "12px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
           ctx.textAlign = "center";
           ctx.fillText(n.label, n.x, n.y + size);
         }
@@ -142,7 +163,8 @@ function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChan
 
       if (!nodesRef.current.length) {
         ctx.fillStyle = "#64748b";
-        ctx.font = "14px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
+        ctx.font =
+          "14px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
         ctx.textAlign = "center";
         ctx.fillText(
           "No nodes selected. Submit a person ID, then toggle repos/teams →",
@@ -212,7 +234,16 @@ function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChan
       el.style.cursor = "default";
       sim.alphaTarget(0);
       // notify parent of final positions
-      onNodesChange?.(nodesRef.current.map(({ id, type, x, y, size, label }) => ({ id, type, x, y, size, label })));
+      onNodesChange?.(
+        nodesRef.current.map(({ id, type, x, y, size, label }) => ({
+          id,
+          type,
+          x,
+          y,
+          size,
+          label,
+        }))
+      );
     };
 
     el.addEventListener("mousedown", onDown);
@@ -225,12 +256,7 @@ function Canvas({ width = 600, height = 200, nodes = [], edges = [], onNodesChan
     };
   }, [onNodesChange]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="block w-full rounded border border-gray-200 dark:border-neutral-700 shadow-sm bg-white"
-    />
-  );
+  return <canvas ref={canvasRef} className="absolute inset-0 block w-full h-full" />;
 }
 
 export default Canvas;

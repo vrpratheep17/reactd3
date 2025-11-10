@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
 // data: [{ label: string, value: number }]
-function D3Canvas({ width = 720, height = 240, data = [] }) {
+function D3Canvas({ data = [] }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -53,7 +53,8 @@ function D3Canvas({ width = 720, height = 240, data = [] }) {
 
       // value label
       ctx.fillStyle = "#111827"; // gray-900
-      ctx.font = "12px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
+      ctx.font =
+        "12px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "bottom";
       ctx.fillText(String(d.value), bx + bw / 2, by - 4);
@@ -61,7 +62,8 @@ function D3Canvas({ width = 720, height = 240, data = [] }) {
 
     // x-axis labels
     ctx.fillStyle = "#374151"; // gray-700
-    ctx.font = "12px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.font =
+      "12px ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     for (const label of labels) {
@@ -89,4 +91,3 @@ function D3Canvas({ width = 720, height = 240, data = [] }) {
 }
 
 export default D3Canvas;
-
