@@ -3,11 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import Sidebar from "./components/Sidebar.jsx";
 import Canvas from "./components/Canvas.jsx";
-import { getPerson, getReposByPerson, getTeamsByPerson } from "./data/api.js";
+import { getPerson, getTeamsWithReposByPerson } from "./data/api.js";
 
 function App() {
   const [form, setForm] = useState({ personId: "", type: "person" });
-  const [toggles, setToggles] = useState({ teams: false, repos: false });
+  const [toggles, setToggles] = useState({ teamMembers: false, repos: false });
   const [person, setPerson] = useState(null);
   const [nodes, setNodes] = useState([]); // for Canvas
   const [edges, setEdges] = useState([]);
@@ -48,32 +48,51 @@ function App() {
         label: person.name,
       };
 
-      const rings = [];
-      if (toggles.repos) {
-        const repos = await getReposByPerson(person.id);
-        rings.push({ items: repos.map((r) => ({ id: r.id, label: r.name })), shape: "square", radius: 120 });
-      }
-      if (toggles.teams) {
-        const teams = await getTeamsByPerson(person.id);
-        rings.push({ items: teams.map((t) => ({ id: t.id, label: t.name })), shape: "triangle", radius: 180 });
-      }
-
       const nextNodes = [center];
       const nextEdges = [];
-      rings.forEach(({ items, shape, radius }) => {
-        const n = items.length;
-        if (n === 0) return;
+
+      if (toggles.teamMembers) {
+        // Fetch teams with repos and lay out hierarchically
+        const teams = await getTeamsWithReposByPerson(person.id);
+        const nTeams = teams.length || 1;
+        const teamRadius = Math.min(canvasWidth, canvasHeight) * 0.28; // ring around center
         const theta0 = -Math.PI / 2;
-        items.forEach((it, idx) => {
-          const theta = theta0 + (idx * 2 * Math.PI) / n;
-          const x = center.x + radius * Math.cos(theta);
-          const y = center.y + radius * Math.sin(theta);
-          // preserve position if node already exists
-          const existing = nodes.find((nn) => nn.id === it.id);
-          nextNodes.push({ id: it.id, type: shape, x: existing?.x ?? x, y: existing?.y ?? y, size: 36, label: it.label });
-          nextEdges.push({ source: center.id, target: it.id });
+        const teamPos = new Map();
+
+        teams.forEach((t, idx) => {
+          const theta = theta0 + (idx * 2 * Math.PI) / nTeams;
+          const x = center.x + teamRadius * Math.cos(theta);
+          const y = center.y + teamRadius * Math.sin(theta);
+          const existing = nodes.find((nn) => nn.id === t.id);
+          const tx = existing?.x ?? x;
+          const ty = existing?.y ?? y;
+          nextNodes.push({ id: t.id, type: "triangle", x: tx, y: ty, size: 36, label: t.name });
+          nextEdges.push({ source: center.id, target: t.id });
+          teamPos.set(t.id, { x: tx, y: ty, repos: t.repos || [] });
         });
-      });
+
+        if (toggles.repos) {
+          const seenRepo = new Set();
+          // place repos around each team in a small local ring
+          for (const [tid, info] of teamPos.entries()) {
+            const repos = info.repos;
+            const m = repos.length || 1;
+            const rRadius = 90; // around team node
+            const start = -Math.PI / 2;
+            repos.forEach((r, i) => {
+              const ang = start + (i * 2 * Math.PI) / m;
+              const rx = info.x + rRadius * Math.cos(ang);
+              const ry = info.y + rRadius * Math.sin(ang);
+              const existing = nodes.find((nn) => nn.id === r.id);
+              if (!seenRepo.has(r.id)) {
+                nextNodes.push({ id: r.id, type: "square", x: existing?.x ?? rx, y: existing?.y ?? ry, size: 28, label: r.name });
+                seenRepo.add(r.id);
+              }
+              nextEdges.push({ source: tid, target: r.id });
+            });
+          }
+        }
+      }
 
       if (!cancelled) {
         setNodes(nextNodes);

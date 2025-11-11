@@ -51,20 +51,28 @@ function Sidebar({ form, setForm, onSubmit, toggles, setToggles, hasItems }) {
             <input
               type="checkbox"
               className="size-4"
-              checked={!!toggles?.teams}
-              onChange={(e) => setToggles((t) => ({ ...t, teams: e.target.checked }))}
+              checked={!!toggles?.teamMembers}
+              onChange={(e) =>
+                setToggles((t) => ({
+                  ...t,
+                  teamMembers: e.target.checked,
+                  ...(e.target.checked ? {} : { repos: false }),
+                }))
+              }
             />
-            <span>Show teams</span>
+            <span>Show team members</span>
           </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              className="size-4"
-              checked={!!toggles?.repos}
-              onChange={(e) => setToggles((t) => ({ ...t, repos: e.target.checked }))}
-            />
-            <span>Show repos</span>
-          </label>
+          {toggles?.teamMembers && (
+            <label className="flex items-center gap-2 pl-6">
+              <input
+                type="checkbox"
+                className="size-4"
+                checked={!!toggles?.repos}
+                onChange={(e) => setToggles((t) => ({ ...t, repos: e.target.checked }))}
+              />
+              <span>Show repos</span>
+            </label>
+          )}
         </div>
       )}
     </aside>

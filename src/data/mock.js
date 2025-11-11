@@ -1,43 +1,36 @@
 export const MOCK_DATA = {
+  repos: {
+    r1: { id: "r1", name: "core-lib" },
+    r2: { id: "r2", name: "api-gateway" },
+    r3: { id: "r3", name: "analytics-ui" },
+    r4: { id: "r4", name: "infra-ops" },
+  },
   people: {
+    // Example shows 4 repos such that:
+    // - r2 connects to multiple teams
+    // - r1, r3, r4 connect to a single team each
     u1: {
       id: "u1",
       name: "Alice Smith",
-      repos: [
-        { id: "r1", name: "app-web" },
-        { id: "r2", name: "api-gateway" },
-        { id: "r3", name: "data-pipeline" },
-      ],
       teams: [
-        { id: "t1", name: "Platform" },
-        { id: "t2", name: "Analytics" },
+        { id: "t1", name: "Platform", repoIds: ["r1", "r2"] },
+        { id: "t2", name: "Analytics", repoIds: ["r2", "r3"] },
+        { id: "t3", name: "Ops", repoIds: ["r4"] },
       ],
     },
     u2: {
       id: "u2",
       name: "Bob Johnson",
-      repos: [
-        { id: "r4", name: "mobile-app" },
-        { id: "r5", name: "design-system" },
-      ],
       teams: [
-        { id: "t3", name: "Mobile" },
-        { id: "t4", name: "Design" },
+        { id: "t4", name: "Mobile", repoIds: ["r1"] },
       ],
     },
     u3: {
       id: "u3",
       name: "Carol Lee",
-      repos: [
-        { id: "r6", name: "ml-platform" },
-        { id: "r7", name: "recommendations" },
-        { id: "r8", name: "experimentation" },
-      ],
       teams: [
-        { id: "t5", name: "ML" },
-        { id: "t6", name: "Search" },
+        { id: "t5", name: "ML", repoIds: ["r3"] },
       ],
     },
   },
 };
-
